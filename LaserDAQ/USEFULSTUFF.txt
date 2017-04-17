@@ -1,0 +1,17 @@
+%http://stackoverflow.com/questions/16613252/how-to-use-keypressfcn-in-matlab-with-a-function-already-create
+
+%% TO USE C++ CODE IN MATLAB SEE:
+%http://uk.mathworks.com/help/simulink/slref/coder.ceval.html
+
+%% GUI STUFF
+%http://uk.mathworks.com/help/matlab/code-to-run-the-gui.html
+
+
+%% IMAGES
+%http://uk.mathworks.com/help/matlab/ref/image-properties.html
+
+%http://www.mathworks.com/matlabcentral/answers/96882-how-can-i-make-image-objects-update-faster-in-matlab
+
+
+%% TRANSFORMATION IMAGE
+%http://uk.mathworks.com/help/images/ref/imregtform.html#inputarg_transformType
