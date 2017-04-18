@@ -1,0 +1,174 @@
+<!--
+This HTML is auto-generated from an m-file.
+Your changes will be overwritten.
+--><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium;">Overview</p><ul xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd"><li><a href="#Clean the slate">Clean the slate</a></li><li><a href="#Correct the X and Y displacements">Correct the X and Y displacements</a></li><li><a href="#Convert the data from X-Y coordinates to Theta-Radius coordinates">Convert the data from X-Y coordinates to Theta-Radius coordinates</a></li><li><a href="#Find the angular displacement by using frequency domain mathematics">Find the angular displacement by using frequency domain mathematics</a></li><li><a href="#Correct the theta displacement">Correct the theta displacement</a></li></ul><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;">Clean the slate<a name="Clean the slate"></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">The demo here in the main.html document can be run directly from the file
+main.m.
+In this section the memory is cleared, some parameters are set, and the
+original images are loaded and displayed.
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">close all
+clear
+clc
+
+<span style="color:green">% Setting up parameters and filenames</span>
+params.VERBOSE          = 1;                    <span style="color:green">%Get more plots out (True or False)</span>
+params.PLANE            = 3;                    <span style="color:green">%Which plane of the RGB is of interest to us for opperations on a single plane</span>
+params.BLACK_BACKGROUND = 1;                    <span style="color:green">%Images have a black background (True or False)</span>
+params.map                      = copper(256);  <span style="color:green">%Set colormap to something that is similar to wood</span>
+params.number_angular_divisions = 2^7;          <span style="color:green">%Powers of two are faster FFT</span>
+params.number_radial_divisions  = 40;           <span style="color:green">%Arbitrary constant</span>
+base_filename = <span style="color:#B20000">'dowel01.jpg'</span>;                  <span style="color:green">%Filename of non-moving image  </span>
+move_filename = <span style="color:#B20000">'dowel02.jpg'</span>;                  <span style="color:green">%Filename of image that will move to the base image</span>
+
+base_image = imread(base_filename);    <span style="color:green">%reads in the image</span>
+move_image = imread(move_filename);    <span style="color:green">%reads in the image</span>
+
+<span style="color:green">% Data visualization.  </span>
+subplot(1,2,1)                    
+subimage(base_image);          
+title(<span style="color:#B20000">'Base image'</span>) 
+subplot(1,2,2)                    
+subimage(move_image);          
+title(<span style="color:#B20000">'Image to move'</span>)
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img01.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;">Correct the X and Y displacements<a name="Correct the X and Y displacements"></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">The two images are displaced from each other in the X and Y direcions.
+First the X and Y direction will be corrected by lining up the centroids
+of the two images.
+</p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">Method: First mask the image from background then find
+centroid of the image. Finally center the image based
+on its centroid.
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">base_plane_of_interest              = base_image(:,:,params.PLANE);
+<span style="color:green">%Must use a single layer grayscale for most operations.  Blue plane is best</span>
+<span style="color:green">%contrast for these images</span>
+base_bw_plane_of_interest           = im2bw(base_plane_of_interest, graythresh(base_plane_of_interest));
+<span style="color:green">%Turn to binary based on threshold gotten from graythresh</span>
+base_plane_of_interest_segmented    = bwmorph(base_bw_plane_of_interest, <span style="color:#B20000">'open'</span>);
+<span style="color:green">%morphology</span>
+base_binary_mask                    = imfill (base_plane_of_interest_segmented, <span style="color:#B20000">'holes'</span>);
+<span style="color:green">%fill it in</span>
+
+<span style="color:green">% Get some data about the new region</span>
+base_properties                     = regionprops(real(base_binary_mask),<span style="color:#B20000">'all'</span>);
+base_centroid_row                   = round(base_properties.Centroid(2));
+base_centroid_col                   = round(base_properties.Centroid(1));
+
+<span style="color:green">% Place a dot at the centroid, one for each layer</span>
+base_image(base_centroid_row, base_centroid_col, 1) = 255;
+base_image(base_centroid_row, base_centroid_col, 2) = 255;
+base_image(base_centroid_row, base_centroid_col, 3) = 255;
+
+<span style="color:green">% Nice to have image be 0dd number of pixels in each diension</span>
+base_image       = make_odd_by_odd(base_image);
+base_binary_mask = make_odd_by_odd(base_binary_mask);
+<span style="color:green">% Grab the new size</span>
+[base_num_rows, base_num_cols, base_num_layers] = size(base_image);
+
+<span style="color:green">% Where is the center of the image?</span>
+base_goal_row   = (base_num_rows - 1) / 2 + 1;
+base_goal_col   = (base_num_cols - 1) / 2 + 1;
+
+<span style="color:green">% how much do I need to move to center this?</span>
+base_delta_rows = base_goal_row - base_centroid_row;
+base_delta_cols = base_goal_col - base_centroid_col;
+
+<span style="color:green">%shift the images to be centered</span>
+base_image       = circshift(base_image      , [base_delta_rows, base_delta_cols]);
+base_binary_mask = circshift(base_binary_mask, [base_delta_rows, base_delta_cols]);
+
+<span style="color:green">% Same thing for the second image.  In production code this would be in </span>
+<span style="color:green">% a function, but this script was made for seminar presentation where all</span>
+<span style="color:green">% the code should be visible.</span>
+<span style="color:green">% Begin repeated code -------------------------------------</span>
+move_plane_of_interest              = move_image(:,:,params.PLANE);
+move_bw_plane_of_interest           = im2bw(move_plane_of_interest, graythresh(move_plane_of_interest));
+move_plane_of_interest_segmented    = bwmorph(move_bw_plane_of_interest, <span style="color:#B20000">'open'</span>);
+move_binary_mask                    = imfill (move_plane_of_interest_segmented, <span style="color:#B20000">'holes'</span>);
+move_properties                     = regionprops(real(move_binary_mask),<span style="color:#B20000">'all'</span>);
+move_centroid_row                   = round(move_properties.Centroid(2));
+move_centroid_col                   = round(move_properties.Centroid(1));
+move_image(move_centroid_row, move_centroid_col, 1) = 255;
+move_image(move_centroid_row, move_centroid_col, 2) = 255;
+move_image(move_centroid_row, move_centroid_col, 3) = 255;
+move_image                          = make_odd_by_odd(move_image);
+move_binary_mask                    = make_odd_by_odd(move_binary_mask);
+[move_num_rows, move_num_cols, move_num_layers]     = size(move_image);
+move_goal_row                       = (move_num_rows - 1) / 2 + 1;
+move_goal_col                       = (move_num_cols - 1) / 2 + 1;
+move_delta_rows                     = move_goal_row - move_centroid_row;
+move_delta_cols                     = move_goal_col - move_centroid_col;
+move_image                          = circshift(move_image      , [move_delta_rows, move_delta_cols]);
+move_binary_mask                    = circshift(move_binary_mask, [move_delta_rows, move_delta_cols]);
+<span style="color:green">% End of repeated code -------------------------------------</span>
+
+<span style="color:green">% Data visualization</span>
+subplot(1,2,1)                    
+subimage(base_image);
+title(<span style="color:#B20000">'Centered base image'</span>) 
+subplot(1,2,2)                    
+subimage(move_image);          
+title(<span style="color:#B20000">'Centered moveable image'</span>)
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img02.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;"><a name=""></a></p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px"><span style="color:green">% Data visualization</span>
+subplot(1,2,1)                    
+subimage(base_binary_mask);
+title(<span style="color:#B20000">'Centered base binary mask'</span>) 
+subplot(1,2,2)                    
+subimage(move_binary_mask);          
+title(<span style="color:#B20000">'Centered movable binary mask'</span>)
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img03.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;">Convert the data from X-Y coordinates to Theta-Radius coordinates<a name="Convert the data from X-Y coordinates to Theta-Radius coordinates"></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">This section transforms the image such that each set of pixels that radiate
+out at a given angle from the centroid become a vertical line in a new image.
+These images can then be 'slid' left and right across each other to
+find the highest correlation between the images.
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">[base_radii, base_theta, base_intensity] = image2angularintesity(base_binary_mask, rgb2gray(base_image), params);
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img04.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;"><a name=""></a></p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">[move_radii, move_theta, move_intensity] = image2angularintesity(move_binary_mask, rgb2gray(move_image), params);
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img05.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;">Find the angular displacement by using frequency domain mathematics<a name="Find the angular displacement by using frequency domain mathematics"></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">The Fast Fourier Tranform has some nice properties that allow the
+angle of highest correlation be found quickly and cleanly.
+The three dimensional plot of correlation as a function of
+angle and radius can be used to figure out which angular shift
+yields the highest correlation between the two images.
+</p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">Looking at the graph, it can be seen that most of the radius
+have reached a consenus as to which angular shift should be used, however
+some of the angles of smaller radius tend to disagree.  Because the
+smaller radii have less pixels, their votes are less informed, so must be
+given less weight in the final decision as to the proper angular shift.
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">BI = fft(base_intensity);  <span style="color:green">%Base Intensity FFT</span>
+MI = fft(move_intensity);  <span style="color:green">%Move Intensity FFT</span>
+CI = conj(BI) .* (MI);     <span style="color:green">%Correlation Intensity FFT</span>
+ci = real(ifft(CI));       <span style="color:green">%Correlation out of FFT space</span>
+nci = ci;                  <span style="color:green">%normalized correlation being built</span>
+nci = nci - repmat(mean(nci), size(nci,1), 1); <span style="color:green">% normalized correlation removes the mean value</span></pre><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;"><a name=""></a></p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">h = surf(move_radii(:,2:end), move_theta(:,2:end), nci(:,2:end));
+set (h, <span style="color:#B20000">'linestyle'</span>, <span style="color:#B20000">'none'</span>)
+title(<span style="color:#B20000">'Correlation of the two images'</span>)
+xlabel(<span style="color:#B20000">'radius'</span>)
+ylabel(<span style="color:#B20000">'angle'</span>)
+zlabel(<span style="color:#B20000">'correlation'</span>)
+colormap(jet)
+shading interp
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img07.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;"><a name=""></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">Find the peak correlation
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px">[value_of_correlation, indice_of_peak_correlation_at_given_radius] = max(ci);
+<span style="color:green">% Do voting to find out how much to shift by</span>
+index_of_peak_correlation = best_correlation_index(indice_of_peak_correlation_at_given_radius, params);</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img08.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;">Correct the theta displacement<a name="Correct the theta displacement"></a></p><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">The angle decided upon in the previous section is now used as the input
+argument to an IMROTATE command which will rotate the image as needed.
+</p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="position: relative; left:30px"><span style="color:green">% mathmatical housekeeping</span>
+degrees_per_step = 360 / params.number_angular_divisions;
+angle_to_shift = index_of_peak_correlation * degrees_per_step;
+
+<span style="color:green">% Finally rotate the images (mask and the image itself)</span>
+rotated_image       = imrotate(move_image      , angle_to_shift,<span style="color:#B20000">'bicubic'</span>,<span style="color:#B20000">'crop'</span>);
+rotated_binary_mask = imrotate(move_binary_mask, angle_to_shift,<span style="color:#B20000">'bicubic'</span>,<span style="color:#B20000">'crop'</span>);
+
+<span style="color:green">% Data visualization</span>
+subplot(1,3,1)
+subimage(base_image)
+title(<span style="color:#B20000">'Base Image'</span>)
+
+subplot(1,3,2)
+subimage(rotated_image)
+title([<span style="color:#B20000">'Image rotated by '</span> num2str(angle_to_shift) <span style="color:#B20000">' degrees'</span>])
+
+subplot(1,3,3)
+subimage(move_image)
+title(<span style="color:#B20000">'Image to rotate'</span>)
+set (gcf, <span style="color:#B20000">'color'</span>, <span style="color:#B20000">'w'</span>)</pre><img xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" src="main_img09.jpg"><p xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" style="color:#990000; font-weight:bold; font-size:medium; page-break-before: auto;"><a name=""></a></p><pre xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">   Doug Hull &lt;hull@mathworks.com&gt;     5/20/2002
+   Copyright 1984-2001 The MathWorks, Inc.
+   This function is not supported by The MathWorks, Inc.
+   It is provided 'as is' without any guarantee of
+   accuracy or functionality.
+</pre><originalCode xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd" code="%% Clean the slate&#xA;% The demo here in the main.html document can be run directly from the file&#xA;% main.m.&#xA;% In this section the memory is cleared, some parameters are set, and the&#xA;% original images are loaded and displayed.&#xA;close all&#xA;clear&#xA;clc&#xA;&#xA;% Setting up parameters and filenames&#xA;params.VERBOSE          = 1;                    %Get more plots out (True or False)&#xA;params.PLANE            = 3;                    %Which plane of the RGB is of interest to us for opperations on a single plane&#xA;params.BLACK_BACKGROUND = 1;                    %Images have a black background (True or False)&#xA;params.map                      = copper(256);  %Set colormap to something that is similar to wood&#xA;params.number_angular_divisions = 2^7;          %Powers of two are faster FFT&#xA;params.number_radial_divisions  = 40;           %Arbitrary constant&#xA;base_filename = 'dowel01.jpg';                  %Filename of non-moving image  &#xA;move_filename = 'dowel02.jpg';                  %Filename of image that will move to the base image&#xA;&#xA;base_image = imread(base_filename);    %reads in the image&#xA;move_image = imread(move_filename);    %reads in the image&#xA;&#xA;% Data visualization.  &#xA;subplot(1,2,1)                    &#xA;subimage(base_image);          &#xA;title('Base image') &#xA;subplot(1,2,2)                    &#xA;subimage(move_image);          &#xA;title('Image to move')&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%% Correct the X and Y displacements&#xA;% The two images are displaced from each other in the X and Y direcions.&#xA;% First the X and Y direction will be corrected by lining up the centroids&#xA;% of the two images.&#xA;%&#xA;% Method: First mask the image from background then find&#xA;% centroid of the image. Finally center the image based &#xA;% on its centroid.&#xA;&#xA;base_plane_of_interest              = base_image(:,:,params.PLANE);&#xA;%Must use a single layer grayscale for most operations.  Blue plane is best&#xA;%contrast for these images&#xA;base_bw_plane_of_interest           = im2bw(base_plane_of_interest, graythresh(base_plane_of_interest));&#xA;%Turn to binary based on threshold gotten from graythresh&#xA;base_plane_of_interest_segmented    = bwmorph(base_bw_plane_of_interest, 'open');&#xA;%morphology&#xA;base_binary_mask                    = imfill (base_plane_of_interest_segmented, 'holes');&#xA;%fill it in&#xA;&#xA;% Get some data about the new region&#xA;base_properties                     = regionprops(real(base_binary_mask),'all');&#xA;base_centroid_row                   = round(base_properties.Centroid(2));&#xA;base_centroid_col                   = round(base_properties.Centroid(1));&#xA;&#xA;% Place a dot at the centroid, one for each layer&#xA;base_image(base_centroid_row, base_centroid_col, 1) = 255;&#xA;base_image(base_centroid_row, base_centroid_col, 2) = 255;&#xA;base_image(base_centroid_row, base_centroid_col, 3) = 255;&#xA;&#xA;% Nice to have image be 0dd number of pixels in each diension&#xA;base_image       = make_odd_by_odd(base_image);&#xA;base_binary_mask = make_odd_by_odd(base_binary_mask);&#xA;% Grab the new size&#xA;[base_num_rows, base_num_cols, base_num_layers] = size(base_image);&#xA;&#xA;% Where is the center of the image?&#xA;base_goal_row   = (base_num_rows - 1) / 2 + 1;&#xA;base_goal_col   = (base_num_cols - 1) / 2 + 1;&#xA;&#xA;% how much do I need to move to center this?&#xA;base_delta_rows = base_goal_row - base_centroid_row;&#xA;base_delta_cols = base_goal_col - base_centroid_col;&#xA;&#xA;%shift the images to be centered&#xA;base_image       = circshift(base_image      , [base_delta_rows, base_delta_cols]);&#xA;base_binary_mask = circshift(base_binary_mask, [base_delta_rows, base_delta_cols]);&#xA;&#xA;% Same thing for the second image.  In production code this would be in &#xA;% a function, but this script was made for seminar presentation where all&#xA;% the code should be visible.&#xA;% Begin repeated code -------------------------------------&#xA;move_plane_of_interest              = move_image(:,:,params.PLANE);&#xA;move_bw_plane_of_interest           = im2bw(move_plane_of_interest, graythresh(move_plane_of_interest));&#xA;move_plane_of_interest_segmented    = bwmorph(move_bw_plane_of_interest, 'open');&#xA;move_binary_mask                    = imfill (move_plane_of_interest_segmented, 'holes');&#xA;move_properties                     = regionprops(real(move_binary_mask),'all');&#xA;move_centroid_row                   = round(move_properties.Centroid(2));&#xA;move_centroid_col                   = round(move_properties.Centroid(1));&#xA;move_image(move_centroid_row, move_centroid_col, 1) = 255;&#xA;move_image(move_centroid_row, move_centroid_col, 2) = 255;&#xA;move_image(move_centroid_row, move_centroid_col, 3) = 255;&#xA;move_image                          = make_odd_by_odd(move_image);&#xA;move_binary_mask                    = make_odd_by_odd(move_binary_mask);&#xA;[move_num_rows, move_num_cols, move_num_layers]     = size(move_image);&#xA;move_goal_row                       = (move_num_rows - 1) / 2 + 1;&#xA;move_goal_col                       = (move_num_cols - 1) / 2 + 1;&#xA;move_delta_rows                     = move_goal_row - move_centroid_row;&#xA;move_delta_cols                     = move_goal_col - move_centroid_col;&#xA;move_image                          = circshift(move_image      , [move_delta_rows, move_delta_cols]);&#xA;move_binary_mask                    = circshift(move_binary_mask, [move_delta_rows, move_delta_cols]);&#xA;% End of repeated code -------------------------------------&#xA;&#xA;% Data visualization&#xA;subplot(1,2,1)                    &#xA;subimage(base_image);&#xA;title('Centered base image') &#xA;subplot(1,2,2)                    &#xA;subimage(move_image);          &#xA;title('Centered moveable image')&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%%  &#xA;&#xA;% Data visualization&#xA;subplot(1,2,1)                    &#xA;subimage(base_binary_mask);&#xA;title('Centered base binary mask') &#xA;subplot(1,2,2)                    &#xA;subimage(move_binary_mask);          &#xA;title('Centered movable binary mask')&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%% Convert the data from X-Y coordinates to Theta-Radius coordinates&#xA;% This section transforms the image such that each set of pixels that radiate &#xA;% out at a given angle from the centroid become a vertical line in a new image.&#xA;% These images can then be 'slid' left and right across each other to &#xA;% find the highest correlation between the images.  &#xA;&#xA;[base_radii, base_theta, base_intensity] = image2angularintesity(base_binary_mask, rgb2gray(base_image), params);&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%%&#xA;[move_radii, move_theta, move_intensity] = image2angularintesity(move_binary_mask, rgb2gray(move_image), params);&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%% Find the angular displacement by using frequency domain mathematics&#xA;% The Fast Fourier Tranform has some nice properties that allow the&#xA;% angle of highest correlation be found quickly and cleanly.&#xA;% The three dimensional plot of correlation as a function of&#xA;% angle and radius can be used to figure out which angular shift&#xA;% yields the highest correlation between the two images.  &#xA;%&#xA;% Looking at the graph, it can be seen that most of the radius&#xA;% have reached a consenus as to which angular shift should be used, however&#xA;% some of the angles of smaller radius tend to disagree.  Because the&#xA;% smaller radii have less pixels, their votes are less informed, so must be&#xA;% given less weight in the final decision as to the proper angular shift.&#xA;&#xA;BI = fft(base_intensity);  %Base Intensity FFT&#xA;MI = fft(move_intensity);  %Move Intensity FFT&#xA;CI = conj(BI) .* (MI);     %Correlation Intensity FFT&#xA;ci = real(ifft(CI));       %Correlation out of FFT space&#xA;nci = ci;                  %normalized correlation being built&#xA;nci = nci - repmat(mean(nci), size(nci,1), 1); % normalized correlation removes the mean value&#xA;&#xA;%%&#xA;h = surf(move_radii(:,2:end), move_theta(:,2:end), nci(:,2:end));&#xA;set (h, 'linestyle', 'none')&#xA;title('Correlation of the two images')&#xA;xlabel('radius')&#xA;ylabel('angle')&#xA;zlabel('correlation')&#xA;colormap(jet)&#xA;shading interp&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%%&#xA;% Find the peak correlation&#xA;[value_of_correlation, indice_of_peak_correlation_at_given_radius] = max(ci);&#xA;% Do voting to find out how much to shift by&#xA;index_of_peak_correlation = best_correlation_index(indice_of_peak_correlation_at_given_radius, params);&#xA;&#xA;%% Correct the theta displacement&#xA;% The angle decided upon in the previous section is now used as the input&#xA;% argument to an IMROTATE command which will rotate the image as needed.&#xA;&#xA;% mathmatical housekeeping&#xA;degrees_per_step = 360 / params.number_angular_divisions;&#xA;angle_to_shift = index_of_peak_correlation * degrees_per_step;&#xA;&#xA;% Finally rotate the images (mask and the image itself)&#xA;rotated_image       = imrotate(move_image      , angle_to_shift,'bicubic','crop');&#xA;rotated_binary_mask = imrotate(move_binary_mask, angle_to_shift,'bicubic','crop');&#xA;&#xA;% Data visualization&#xA;subplot(1,3,1)&#xA;subimage(base_image)&#xA;title('Base Image')&#xA;&#xA;subplot(1,3,2)&#xA;subimage(rotated_image)&#xA;title(['Image rotated by ' num2str(angle_to_shift) ' degrees'])&#xA;&#xA;subplot(1,3,3)&#xA;subimage(move_image)&#xA;title('Image to rotate')&#xA;set (gcf, 'color', 'w')&#xA;&#xA;%%&#xA;%    Doug Hull <hull@mathworks.com&gt;     5/20/2002&#xA;%    Copyright 1984-2001 The MathWorks, Inc.&#xA;%    This function is not supported by The MathWorks, Inc.&#xA;%    It is provided 'as is' without any guarantee of&#xA;%    accuracy or functionality."></originalCode>

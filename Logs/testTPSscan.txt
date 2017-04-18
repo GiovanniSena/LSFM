@@ -1,0 +1,10 @@
+testTPSscan_001.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_002.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_003.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_004.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_005.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_006.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_007.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_008.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_009.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
+testTPSscan_010.tif; X= 0.0000; Y= 1.1700; Z= 0.0000; C= 0.0000; F= 1.7303; YSpacing= 0.0010 mm 
