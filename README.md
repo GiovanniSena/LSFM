@@ -1,2 +1,2 @@
 # LiSM
-This is the entire code used tro control LiM in The Laboratory of Plant Morphogenesis, at Imperial College London
+This is the entire code used to control LiSM in The Laboratory of Plant Morphogenesis, at Imperial College London
