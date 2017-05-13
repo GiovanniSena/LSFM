@@ -1,11 +1,13 @@
 function  GUI_loadCoord( sourceBtn )
-%% GUI_SAVECOORD Load coordinates from file and position the stages
-%   
+%%  GUI_SAVECOORD Load coordinates from file. Position the motors accordingly/
+%   The function reads the coordinate file, retrieve the coordinates for
+%   the five motors and activate the motors to position them at those
+%   coordinates.
+%   NOTE: no check is performed on the coordinates: it is assumed that the
+%   user has loaded sensible values.
     motorHandles = getappdata(gcf, 'actxHnd');
     coordFile= getappdata(gcf, 'coordFile');
     
-    %setappdata(mainFig, 'storedCoord', storedCoord);
-    % TO DO: CHECK FOR COLLISIONS!
     if(exist(coordFile)==2)
         storedCoord = ini2struct(coordFile);
         HW_moveAbsolute(motorHandles(1), str2double(storedCoord.saved.sx));

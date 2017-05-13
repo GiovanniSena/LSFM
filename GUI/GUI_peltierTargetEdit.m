@@ -1,7 +1,7 @@
 function [ output_args ] = GUI_peltierTargetEdit( source, ~ )
- %% GUI_TARGETTEMPEDIT: executes when the user changes the target temperature (PELTIER > AUTO)
- %  Check that input number is numeric and comprised within "reasonable"
- %  temperatures.
+%%  GUI_TARGETTEMPEDIT: executes when the user changes the target temperature (PELTIER > AUTO)
+%   Check that input number is numeric and comprised within "reasonable"
+%   temperatures.
 
     input = str2double(get(source,'string'));
     display(input);

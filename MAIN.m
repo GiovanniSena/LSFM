@@ -5,6 +5,9 @@
  % Please ensure that all the necessary hardware is connected and switched
  % on and that their ports are correctly configured in the file ".\CFG\myConfig.ini"
  % Refer to the LSFM user manual for further details.
+ % Initial code by Paolo Baesso
+ % Further modifications by members of the "Lab of plant morphogenesys"
+ % Imperial College London
  
     diary('D:\myMATLAB\LaserDAQ\Logs\log.txt');
     disp('========================================');

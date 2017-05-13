@@ -14,8 +14,5 @@ function tempHW_peltToggle( myTemp, status )
             command = 'peltOFF';
     end
         fprintf(myTemp, command);
-        %reply = fscanf(myTemp); % This line reads the reply from the peltier. It is needed to avoid having the reply 'floating' around in the serial communication.
-    
-
 end
 

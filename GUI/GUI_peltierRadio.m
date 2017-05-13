@@ -1,7 +1,7 @@
 function  GUI_peltierRadio( source, ~, pos )
- %% GUI_PELTRADIO Function to react to the peltier radio button
- %  This function can switch the Peltier on or off. It can also set the
- %  code to automatically try to maintain a determined temperature.
+%%  GUI_PELTRADIO Function to react to the peltier radio button
+%    This function can switch the Peltier on or off. It can also set the
+%   code to automatically try to maintain a determined temperature.
 
     mainFig= GUI_getParentFigure(source);
     targetTemp= getappdata(mainFig, 'targetTemp');

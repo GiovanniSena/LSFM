@@ -1,19 +1,18 @@
 function GUI_clickMove(source, ~, ~)
- %% GUI_clickMove: executed when one of the manual move buttons is pressed.
- %
+%%  GUI_clickMove: executed when one of the manual move buttons is pressed.
+%   This is the main function in charge of correctly moving the motors when
+%   the user presses one of the movement buttons.
+%   Based on the combination of keys pressed, the motors can move in steps
+%   of different amplitude. The values of the steps are defined in the
+%   configuration file.
     
-    %smallStep = 0.01;
-    %mediumStep = 0.1;
-    %largeStep = 1.0;
     
-  % RETRIEVE THE NAME OF THE PARENT FIGURE FOR THE BUTTON
+%   RETRIEVE THE NAME OF THE PARENT FIGURE FOR THE BUTTON
     mainFig= GUI_getParentFigure(source);
-            
     confData= getappdata(mainFig, 'confPar');
-    %confData= getappdata(mainFig, 'confPar');
     DEBUG= confData.application.debug;
     
-    %DEFINE STEP SIZES IN MM (retrieve from myConfig.ini)
+%   DEFINE STEP SIZES IN MM (retrieve from myConfig.ini)
     stepSize = 0;
     smallStep= str2num(confData.application.smallstep)
     mediumStep= str2num(confData.application.mediumstep)
@@ -26,9 +25,10 @@ function GUI_clickMove(source, ~, ~)
     defColor= get(source, 'BackgroundColor'); %
     set(source, 'BackgroundColor', 0.9*defColor); % Button is disabled, so we change color manually
     
-    clickType= get(mainFig,'SelectionType'); % normal (left click), open (double click), extend (shift + left click) or alt (right click or ctrl + left click)
+%   normal (left click), open (double click), extend (shift + left click) or alt (right click or ctrl + left click)
+    clickType= get(mainFig,'SelectionType');
     
-    % Determine amplitude of step, based on click type
+%   Determine amplitude of step, based on click type
     switch clickType
         case 'normal'
             if (DEBUG) disp('MOUSELEFT'); end
@@ -46,8 +46,8 @@ function GUI_clickMove(source, ~, ~)
             disp('do not know');
     end
     
-    % Check which button was pressed and determine what motor to use.
-    %get(source)
+%   Check which button was pressed and determine what motor to use.
+%   get(source)
     motorHandles = getappdata(mainFig, 'actxHnd');
     buttonPressed = get(source, 'Tag');
     lockXCheck= getappdata(mainFig, 'lockXCheck');
@@ -83,9 +83,10 @@ function GUI_clickMove(source, ~, ~)
             motor= 0;
     end
     
-    pause(0.1); % Pause to make sure we see the color change
+    pause(0.1);
     set(source, 'BackgroundColor', defColor); % Return button to default color.
     if (motor ~= 0)
+    % Check if the "lock" flags are active
         if ((lockXCheck.Value==1) && (motor==motorHandles(1))) % Move Sx, follow with Cx
             HW_moveRelative(motor, stepSize);
             HW_moveRelative(motorHandles(4), -stepSize); 
@@ -102,6 +103,4 @@ function GUI_clickMove(source, ~, ~)
             HW_moveRelative(motor, stepSize); % Just move motor
         end
     end
-    
-    
 end

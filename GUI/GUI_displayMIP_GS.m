@@ -1,4 +1,4 @@
-function [MIPmean, MIPstDev]= GUI_displayMIP( mainFig, inputStack )
+function [MIPmean, MIPstDev]= GUI_displayMIP_GS( mainFig, inputStack )
  %% GUI_DISPLAYMIP Display maximum intensity projection of the stack in the preview space
  %  The image is processed to extract the MIP in the Z direction (stack
  %  direction). Once rotated and resized, it is displayed in the panel on

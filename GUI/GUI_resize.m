@@ -1,14 +1,14 @@
 function GUI_resize( varargin )
-%GUI_RESIZE Summary of this function goes here
-%   Detailed explanation goes here
+%%  GUI_RESIZE Called upon resizing the GUI
+%   This function resizes the motor indicators to make sure that the
+%   resizing process maintains the GUI's aspect.
     
     actxHandle = getappdata(gcf, 'actxHnd');
-    motorLabel = getappdata(gcf, 'motorLabel'); % The labels scale with the panel, so use them as reference. 
-                                                % Initially labels are [(90*i)-70 MaxWindowY-30 80 15],
-                                                % Controls are [(90*i)-70 MaxWindowY-80 80 40]
-                                               
-    
-     for i = 1: numel(actxHandle) % This should also prevent errors on creation drawing.
+    motorLabel = getappdata(gcf, 'motorLabel');
+    % The labels scale with the panel, so use them as reference. 
+    % Initially labels are [(90*i)-70 MaxWindowY-30 80 15],
+    % Controls are [(90*i)-70 MaxWindowY-80 80 40]
+    for i = 1: numel(actxHandle)
          set(motorLabel(i), 'Units', 'Pixels');
          labelPos = get(motorLabel(i), 'Position');
          
