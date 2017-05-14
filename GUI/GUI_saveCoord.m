@@ -1,6 +1,9 @@
 function  GUI_saveCoord( sourceBtn )
-%% GUI_SAVECOORD Store the current coordinates to file
-%   
+%%  GUI_SAVECOORD Store the current coordinates to file
+%   The function reads the current position of the actuators and saves
+%   their values to a text file so that they can be retrieved at a later
+%   time (see GUI_loadCoord).
+
     motorHandles = getappdata(gcf, 'actxHnd');
     storedCoord = getappdata(gcf, 'storedCoord');
     coordFile= getappdata(gcf, 'coordFile');

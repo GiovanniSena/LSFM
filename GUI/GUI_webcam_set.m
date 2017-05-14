@@ -1,6 +1,6 @@
 function GUI_webcam_set( source, ~ )
- %% GUI_CAMERA_SET Summary of this function goes here
- %   Detailed explanation goes here
+%%  GUI_CAMERA_SET Modify webcam settings
+%   GUI function to modify main settings of the webcam.
     
     value= get(source, 'value');
     tag= get(source, 'tag');

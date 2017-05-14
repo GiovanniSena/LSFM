@@ -1,13 +1,13 @@
 function GUI_updatePlots( mainFig, myTimeseries1, myTimeseries2, myTimeseries3, myTimeseries4 )
- %% GUI_UPDATEPLOTS Updates the plots in the "plots" tab with data from timeseries.
- %  The first 3 timeseries will be plotted together in the middle graph, the last
- %  timeseries will be plotted on its own on the bottom graph.
+%%  GUI_UPDATEPLOTS Updates the plots in the "plots" tab with data from timeseries.
+%   The first 3 timeseries will be plotted together in the middle graph, the last
+%   timeseries will be plotted on its own on the bottom graph.
  
     XZhaxes= getappdata(mainFig, 'XZhaxes'); % PLOT FOR XZ
     YZhaxes= getappdata(mainFig, 'YZhaxes'); % PLOT FOR YZ
     
     % Show time in specific units
-    unit= 24; % Use 86400 for seconds, 1440 for minutes, 24 for hours (remember to change the labels accordingly)
+    unit= 24; % Use 86400 for seconds, 1440 for minutes, 24 for hours
     
     temporaryX= myTimeseries1;
     temporaryX.Time= unit*(temporaryX.Time - temporaryX.Time(1)); 
@@ -18,9 +18,7 @@ function GUI_updatePlots( mainFig, myTimeseries1, myTimeseries2, myTimeseries3, 
     temporarydS= myTimeseries4;
     temporarydS.Time= unit*(temporarydS.Time - temporarydS.Time(1)); 
     
-    %plot(cumulX_Ts,  'Parent', XZhaxes);
     plot(temporaryX,  'Parent', XZhaxes);
-    %datetick(XZhaxes,'x', 'dd HH:MM');
     hold(XZhaxes, 'on');
     plot(temporaryY,  'Parent', XZhaxes);
     hold(XZhaxes, 'on');
@@ -30,12 +28,9 @@ function GUI_updatePlots( mainFig, myTimeseries1, myTimeseries2, myTimeseries3, 
     legend(XZhaxes, 'X', 'Y', 'Z', 'Location', 'northwest', 'Orientation', 'horizontal');
     hold(XZhaxes, 'off');
 
-    plot(temporarydS,  'Parent', YZhaxes); % this was in original plots
+    plot(temporarydS,  'Parent', YZhaxes);
     title(YZhaxes, '');
-    %datetick(YZhaxes,'x', 'dd HH:MM');
     xlabel(YZhaxes, 'Time [h]') ;
     ylabel(YZhaxes, 'Intensity') ;
-    
-
 end
 

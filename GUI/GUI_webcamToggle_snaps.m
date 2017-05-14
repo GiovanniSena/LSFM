@@ -1,18 +1,15 @@
 function GUI_webcamToggle_snaps( state )
- %% GUI_WEBCAMTOGGLE Button call back for camera preview.
- %   %Use snapshots instead of stream because Matlab sucks (cannot preview
- %   webcam obj in container).
+%%  GUI_WEBCAMTOGGLE Button call back for camera preview.
+%   Use snapshots instead of stream
   
- % Retrieve webcam
+%   Retrieve webcam
     webcam = getappdata(gcf, 'webcam');
     
- % Retrieve webcam image container   
+%   Retrieve webcam image container   
     webcamImage= getappdata(gcf, 'webcamImage');
 
- % Check if we have already created a timer object for the webcam
+%   Check if we have already created a timer object for the webcam
     timerName = 'webcamTimer';
-    %out = timerfind('Name', timerName);
-    %found = numel(out);
     if (isappdata(gcf, 'webTimer'))
         webTimer= getappdata(gcf, 'webTimer');
     else
@@ -27,13 +24,9 @@ function GUI_webcamToggle_snaps( state )
     else
         stop(webTimer);
     end
-    
-
-    
-    
- % Retrieve webcam indicator on main GUI
+%   Retrieve webcam indicator on main GUI
     WebInd = getappdata(gcf, 'WebInd');
- % Set webcam indicator on main GUI and set the image container to display a solid color   
+%   Set webcam indicator on main GUI and set the image container to display a solid color   
     if (state==1)
         set(WebInd, 'string', '<html>WEBCAM<br>ON');
         set(WebInd, 'backgroundcolor', 'green'); 
@@ -44,6 +37,5 @@ function GUI_webcamToggle_snaps( state )
         blankimage(:,:,3) = 0.8;
         set(webcamImage, 'CData', blankimage);
     end
-    
 end
 
