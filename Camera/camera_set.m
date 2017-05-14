@@ -1,28 +1,20 @@
 function camera_set( video_obj, video_src, field, value )
-  %Set parameters for camera
-  %
-%     propinfo(video_src)
-%     disp('EXPOSURE')
+%%  Use to modify camera settings after initialization
+%   The value of "field" must be one that the camera supports (check the
+%   camera manual for details). Some parameters are common to all camera
+%   (for instance "Exposure").
+%   The "value" specifies the assigned value for the parameters. The user
+%   should make sure that the value typed is compatible with the camera
+%   settings.
+%   Examples of valid parameters:
 %     propinfo(video_src, 'Exposure')
-%     disp('READOUT')
 %     propinfo(video_src, 'Readout')
-%     disp('COOLING')
 %     propinfo(video_src, 'Cooling')
-%     disp('OFFSET')
 %     propinfo(video_src, 'NormalizedGain')
 %     get(video_obj, 'VideoResolution')
-    %video_src.Exposure= value/1000;
     
-    %SET REQUIRED FIELD
+%   SET REQUIRED FIELD
     video_src.(field)= value;
     myMsg= ['Camera ' field '= '  num2str(value) ];
     disp(myMsg);
-    
-    %EXTRA BITS
-    %imaqhelp(video_obj, 'VideoResolution')
-    %get(video_obj, 'VideoResolution')
-    %video_src.get();
-    %get(video_obj)
-    %1.4000e-05 1.0737e+03 EXPOSURE
-    
 end

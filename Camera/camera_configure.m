@@ -1,8 +1,11 @@
 function camera_configure( video_obj, video_src, camSettings )
-  %Set parameters for camera
-  %
+%%  Set configuration for camera
+%   Configures the camera's main parameters such as trigger mode and
+%   exposure. In our project these parameters can be hard-coded as we do
+%   not want the user to modify them.
+
     camSettings.trgMode = 'Manual';
-    camSettings.exposure = 1000; % in us. Range?
+    camSettings.exposure = 1000; % in us.
     camSettings.frameDelay= 1;
     camSettings.framePerTrg= 1;
     camSettings.frameGrabInt= 1;
@@ -15,5 +18,4 @@ function camera_configure( video_obj, video_src, camSettings )
     video_obj.FramesPerTrigger  = camSettings.framePerTrg; 
     video_obj.FrameGrabInterval = camSettings.frameGrabInt; 
     set(video_obj, 'ReturnedColorspace', camSettings.colorSpace);
-    
 end
