@@ -1,6 +1,8 @@
 function [ output_args ] = GUI_localSearch( mainFig, sourceBtn )
- %% GUI_ROOTSEARCH Summary of this function goes here
- %   Detailed explanation goes here
+%%  GUI_ROOTSEARCH Performs a root search near the current coordinates
+%   This function search for a maximum in the preview intensity to identify
+%   the location of the root. The search is performed by moving the cuvette
+%   in X, Y and Z and measuring the global intensity of the image.
     
     fprintf('LOCAL SEARCH MACRO ACTIVATED\n');
     setappdata(mainFig, 'isSearching', 1);

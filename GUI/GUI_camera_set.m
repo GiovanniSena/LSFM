@@ -1,6 +1,8 @@
 function GUI_camera_set( source, ~ )
- %% GUI_CAMERA_SET Summary of this function goes here
- %   Detailed explanation goes here
+%%  GUI_CAMERA_SET Set main parameters of the camera
+%   Allows the user to modify the main parameters (gain, exposure) of the
+%   camera. Further parameters can be added by simply adding more cases in
+%   the switch structure.
     
     value= get(source, 'value');
     tag= get(source, 'tag');

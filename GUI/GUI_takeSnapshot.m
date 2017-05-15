@@ -1,19 +1,21 @@
 function GUI_takeSnapshot( sourceBtn )
- %% GUI_TAKESNAPSHOT Take 1 picture and save it to file
- %   
+%%  GUI_TAKESNAPSHOT Take 1 picture and save it to file
+%   Instructs the GUI that the user wants to acquire a single picture from
+%   the camera.
+
     disp('TAKING SNAPSHOT');
     
     confData= getappdata(gcf, 'confPar');
     video_obj= getappdata(gcf, 'vidobj'); 
     video_src= getappdata(gcf, 'videosrc');
     DEBUG= confData.application.debug;
- % READ N SLICES AND SPACING
+%   READ N SLICES AND SPACING
     saveDir= confData.application.savedir;
     logDir= confData.application.logdir;
     avg_sample= str2double(confData.user.avg_sample);
     motorHandles = getappdata(gcf, 'actxHnd');
     
-  % READ FILE NAME
+%   READ FILE NAME
     fNameField =getappdata(gcf, 'fNameField');
     fileName= get(fNameField, 'string');
     if isempty(fileName)

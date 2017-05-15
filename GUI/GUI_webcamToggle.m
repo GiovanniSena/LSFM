@@ -1,20 +1,17 @@
 function GUI_webcamToggle( state )
- %% GUI_WEBCAMTOGGLE Button call back for camera preview.
- %   
+%%  GUI_WEBCAMTOGGLE Notify the GUI to switch the webcam on/off
+%   If a webcam is installed, this function allows to turn it of/off   
   
- % Retrieve webcam
+%   Retrieve webcam
     webcam = getappdata(gcf, 'webcam');
     
- % Retrieve webcam image container   
+%   Retrieve webcam image container   
     webcamImage= getappdata(gcf, 'webcamImage');
+    web_previewToggle_snaps(webcam, webcamImage, state); % Use snapshots instead of stream
 
-    web_previewToggle_snaps(webcam, webcamImage, state); %Use snapshots instead of stream because Matlab sucks (cannot preview webcam obj in container)
-
-    
-    
- % Retrieve webcam indicator on main GUI
+%   Retrieve webcam indicator on main GUI
     WebInd = getappdata(gcf, 'WebInd');
- % Set webcam indicator on main GUI and set the image container to display a solid color   
+%   Set webcam indicator on main GUI and set the image container to display a solid color   
     if (state==1)
         set(WebInd, 'string', '<html>WEBCAM<br>ON');
         set(WebInd, 'backgroundcolor', 'green'); 
@@ -25,6 +22,5 @@ function GUI_webcamToggle( state )
         blankimage(:,:,3) = 0.8;
         set(webcamImage, 'CData', blankimage);
     end
-    
 end
 

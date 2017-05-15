@@ -1,26 +1,24 @@
 function [ output_args ] = GUI_rootSearch( mainFig, sourceBtn )
- %% GUI_ROOTSEARCH Summary of this function goes here
- %   Detailed explanation goes here
+%%  GUI_ROOTSEARCH Performs a cuvette scan in order to locate the root
+%   When run, this function will move the cuvette in a boustrophedon
+%   pattern (in X,Y) in order to locate the root.
+%   The extent of the scan and the number of steps is defined by the user
+%   via the config file. More documentation is available in the LSFM
+%   manual.
     
-  % FOCUS = 5
-  % Sy = 2
-  % Sx= 1
-  % Sz= 3
-  % C= 4
- 
     setappdata(mainFig, 'isSearching', 1);
     setappdata(mainFig, 'maxSearch', 0);
     
     tic()
-  % DISABLE BUTTON
+%   DISABLE BUTTON
     set(sourceBtn, 'string', '<HTML><FONT size="-1">WAIT');
     set(sourceBtn, 'enable', 'off');
     
-  % ENABLE ABORT BUTTON
+%   ENABLE ABORT BUTTON
     abort_src_btn= getappdata(gcf, 'abort_src_btn');
     set(abort_src_btn, 'enable', 'on');
     
-  % READ APPLICATION DATA USED FOR SCAN PARAMETERS
+%   READ APPLICATION DATA USED FOR SCAN PARAMETERS
     motorHandles = getappdata(mainFig, 'actxHnd');
     confData= getappdata(mainFig, 'confPar');
     maxSpeedNormal= str2num(confData.motor.maxspeednormal);
@@ -35,7 +33,7 @@ function [ output_args ] = GUI_rootSearch( mainFig, sourceBtn )
     slowSrchCheck= getappdata(mainFig, 'slowSrchCheck');
     slowFlag= slowSrchCheck.Value;
     
-  % Initialize array to user values
+%   Initialize array to user values
     nMotors= numel(motorHandles)-1;
     if slowFlag
         maxSpeedMotor(1:nMotors) = maxSpeedLow;
@@ -45,36 +43,29 @@ function [ output_args ] = GUI_rootSearch( mainFig, sourceBtn )
         accMotor(1:nMotors) = accelNormal;
     end
   
-  % SET SCAN SPEED
+%   SET SCAN SPEED
     GUI_setVelocityParameters(mainFig, maxSpeedMotor, accMotor);
-
     
-  % SCAN PARAMETERS
+%   SCAN PARAMETERS
     focusPos= 22.53;
     camPos= 20.1;
     Sy_start= 10.;
-    %Sy_stop= 9.5;
-    %deltaY= 1.0; % 30 um per step
     Ysteps= 20;
     Sx_start= 20.4;
-    %deltaX= 0.08;
-    %Xsteps= 20;%20
-    %Zsteps=3;%3
-    %deltaZ= -0.15;
     
-  % STORE OLD POSITIONS
+%   STORE OLD POSITIONS
     for i=1:nMotors
         oldPos(i)= HW_getPos(motorHandles(i));
     end
   
-  % SCAN Z
+%   SCAN Z
     for stepZ=1:Zsteps
         % Check flag to continue search or not
         searchFlag= getappdata(mainFig, 'isSearching');
         if (~searchFlag)
             break
         end
-      % POSITION Sy AND F
+    %   POSITION Sy AND F
         if oldPos(5) >= focusPos 
             HW_moveAbsolute(motorHandles(5), focusPos); % First move focus away, then Sy
             HW_moveAbsolute(motorHandles(2), Sy_start); 
@@ -83,11 +74,11 @@ function [ output_args ] = GUI_rootSearch( mainFig, sourceBtn )
             HW_moveAbsolute(motorHandles(5), focusPos);
         end
     
-      % POSITION Sx AND Cx
+    %   POSITION Sx AND Cx
         HW_moveAbsolute(motorHandles(4), camPos);
         HW_moveAbsolute(motorHandles(1), Sx_start);
 
-      % SCAN Sx AND Sy
+    %   SCAN Sx AND Sy
         for stepX= 1:Xsteps
              % Check flag to continue search or not
             searchFlag= getappdata(mainFig, 'isSearching');
@@ -113,27 +104,27 @@ function [ output_args ] = GUI_rootSearch( mainFig, sourceBtn )
     
     searchFlag= getappdata(mainFig, 'isSearching');
     if (searchFlag)
-      % RETURN Z TO ITS ORIGINAL POSITION
+    %   RETURN Z TO ITS ORIGINAL POSITION
         HW_moveAbsolute(motorHandles(3),  oldPos(3));
 
-      % MOVE CUVETTE TO THE MAX POSITION?
+    %   MOVE CUVETTE TO THE MAX POSITION?
         fprintf('MOVING CUVETTE TO MAXIMUM INTENSITY POINT\n');
         posArray= GUI_readFileMaxPosition(mainFig);
         for i=1:5
              HW_moveAbsolute(motorHandles(i), posArray(i));
         end
     end
-  % RESET SEARCH FLAG  
+%   RESET SEARCH FLAG  
     setappdata(mainFig, 'isSearching', 0);
     
-  % RESET SCAN SPEED TO DEFAULT VALUES
+%   RESET SCAN SPEED TO DEFAULT VALUES
     GUI_setVelocityParameters(mainFig, [2.1 2.1 2.1 2.1 2.1], [1.4 1.4 1.4 1.4 1.4]);
     
-  % DISABLE ABORT BUTTON
+%   DISABLE ABORT BUTTON
     abort_src_btn= getappdata(gcf, 'abort_src_btn');
     set(abort_src_btn, 'enable', 'off');  
     
-  % ENABLE BUTTON
+%   ENABLE BUTTON
     set(sourceBtn, 'string', '<HTML><FONT size="-1">ROOT<br>SEARCH');
     set(sourceBtn, 'enable', 'on');
     toc()

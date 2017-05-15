@@ -1,6 +1,7 @@
 function GUI_pumpToggle( state )
- %% GUI_PUMPTOGGLE Summary of this function goes here
- %   Detailed explanation goes here
+%%  GUI_PUMPTOGGLE Toggle the status of the pump
+%   The function adjusts the indicators and (de)activates the pump
+%   depending on the user's actions.
     
     radioButton =  getappdata(gcf, 'pumpRadio');
     selectPump = str2num(get(get(radioButton,'SelectedObject'), 'tag')); %#ok<ST2NM>

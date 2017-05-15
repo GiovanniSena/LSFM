@@ -1,33 +1,29 @@
 function GUI_clickOther(source, ~, ~)
- %% GUI_clickMove: executed when one of the manual move buttons is pressed.
- %
+%%  GUI_clickMove: executed when one of GUI buttons is pressed (not motor related)
+%   The function parses the data from the button to determine the course of
+%   action to perform. Each button has a tag that is used to recognize it
+%   and perform its specific task.
   
-  % RETRIEVE THE NAME OF THE PARENT FIGURE FOR THE BUTTON
+%   RETRIEVE THE NAME OF THE PARENT FIGURE FOR THE BUTTON
     mainFig= GUI_getParentFigure(source);
     confData= getappdata(mainFig, 'confPar');
-    %confData= getappdata(mainFig, 'confPar');
     DEBUG= confData.application.debug;
-    
-    
     
     defColor= get(source, 'BackgroundColor'); %
     set(source, 'BackgroundColor', 0.9*defColor); % Button is disabled, so we change color manually
     
-    %clickType= get(gcf,'SelectionType'); % normal (left click), open (double click), extend (shift + left click) or alt (right click or ctrl + left click)
-    
-    % Check which button was pressed and determine what motor to use.
-
+%   Check which button was pressed and determine what motor to use.
     buttonPressed = get(source, 'Tag');
     if (DEBUG)
         disp(['Button: ', buttonPressed, ' CLICKED']);
     end
     
     switch buttonPressed
-        case 'OPEN_SH'
+        case 'OPEN_SH' %Open shutter
             motorHandles = getappdata(mainFig, 'actxHnd');
             motor= motorHandles(6);
             GUI_shutterToggle(motor, 1);
-        case 'CLOSE_SH'  
+        case 'CLOSE_SH' %Close shutter
             motorHandles = getappdata(mainFig, 'actxHnd');
             motor= motorHandles(6);
             GUI_shutterToggle(motor, 0);
@@ -71,8 +67,7 @@ function GUI_clickOther(source, ~, ~)
             GUI_adjustTracking(mainFig, source);
         case 'ABORT_SRC'
             GUI_abortSearch(mainFig, source);
-        case 'TMP' %for debugging
-            %GUI_setVelocityParameters(mainFig, [2.1 2.1 2.1 2.1 2.1], [1.4 1.4 1.4 1.4 1.4]);
+        case 'TMP' % use for debugging
             HW_getVelocityParameters(mainFig);
         case 'BACKGROUND_SNAP' %
             GUI_bgrsnap(mainFig, source);
@@ -80,7 +75,7 @@ function GUI_clickOther(source, ~, ~)
             disp('BUTTON UNKNOWN');
     end
     
-    pause(0.1); % Pause to make sure we see the color change
+    pause(0.1);
     set(source, 'BackgroundColor', 'default'); % Return button to default color.    
     
 end
