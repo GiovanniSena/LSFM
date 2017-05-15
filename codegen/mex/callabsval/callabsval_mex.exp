@@ -1,7 +1,0 @@
-callabsval_mex.mexw64
-callabsval		callabsval
-callabsval_atexit		callabsval_atexit
-callabsval_initialize		callabsval_initialize
-callabsval_terminate		callabsval_terminate
-emlrtMexFcnProperties		emlrtMexFcnProperties
-mexFunction		mexFunction
