@@ -1,8 +1,0 @@
-LIBRARY callabsval_mex.mexw64
-EXPORTS
-mexFunction
-emlrtMexFcnProperties
-callabsval
-callabsval_initialize
-callabsval_terminate
-callabsval_atexit
