@@ -1,13 +1,13 @@
 function [ dblValue ] = readLEDstatus( ~ )
-%Read LED status from Labjack. Return 1 for ON, 0 for OFF.
-%
-    ljasm = NET.addAssembly('LJUDDotNet'); %Make the UD .NET assembly visible in MATLAB
+%%  Read LED status from Labjack.
+%   Return 1 for ON, 0 for OFF.
+
+%   Make the UD .NET assembly visible in MATLAB
+    ljasm = NET.addAssembly('LJUDDotNet');
     ljudObj = LabJack.LabJackUD.LJUD;
 
-    %Open the first found LabJack U3.
+%   Open the first found LabJack U3.
     [ljerror, ljhandle] = ljudObj.OpenLabJack(LabJack.LabJackUD.DEVICE.U3, LabJack.LabJackUD.CONNECTION.USB, '0', true, 0);
-
-    
     ljudObj.AddRequest(ljhandle, LabJack.LabJackUD.IO.GET_DIGITAL_BIT_STATE, 4, 0, 0, 0);
     ljudObj.GoOne(ljhandle);
     [~, ~, ~, dblValue, ~, dummyDbl] = ljudObj.GetFirstResult(ljhandle, 0, 0, 0, 0, 0);
@@ -16,7 +16,5 @@ function [ dblValue ] = readLEDstatus( ~ )
     else
         display('LEDs OFF');
     end
-    %methods(ljudObj)
-
 end
 

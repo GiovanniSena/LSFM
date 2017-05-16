@@ -1,10 +1,9 @@
 function [ dblValue ] = LED_switch(ljudObj, ljhandle, port, state)
- %% Switch on/off LEDs. Return the status of the LEDs (1 = ON, 0 = OFF).
- % State is a number, not a char.
+%%  Switch LED clusters on/off LED. Return the status of the LEDs (1 = ON, 0 = OFF).
+%   State is a number, not a char.
     
-    %confData= getappdata(gcf, 'confPar');
-    %DEBUG= confData.application.debug;
-
+    confData= getappdata(gcf, 'confPar');
+    DEBUG= confData.application.debug;
     if (state == 1)
             %SWITCH LEDs ON
             %Set digital output FIO4 to output-high.
@@ -18,7 +17,6 @@ function [ dblValue ] = LED_switch(ljudObj, ljhandle, port, state)
             ljudObj.GoOne(ljhandle);
             %if(DEBUG) display('Switching LEDs OFF'); end
     end
-    
     ljudObj.AddRequest(ljhandle, LabJack.LabJackUD.IO.GET_DIGITAL_BIT_STATE, port, 0, 0, 0);
     ljudObj.GoOne(ljhandle);
     [~, ~, ~, dblValue, ~, dummyDbl] = ljudObj.GetFirstResult(ljhandle, 0, 0, 0, 0, 0);
@@ -27,5 +25,4 @@ function [ dblValue ] = LED_switch(ljudObj, ljhandle, port, state)
     else
         display('LEDs OFF');
     end
-    
 end

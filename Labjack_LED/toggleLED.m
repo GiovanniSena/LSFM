@@ -1,16 +1,18 @@
 function [ dblValue ] = toggleLED(~, ~,  state)
-%% Switch on/off LEDs. Return the status of the LEDs (1 = ON, 0 = OFF).
+%%  Switch on/off LEDs.
+%   Return the status of the LEDs (1 = ON, 0 = OFF).
 
-
-    ljasm = NET.addAssembly('LJUDDotNet'); %Make the UD .NET assembly visible in MATLAB
+%   Make the UD .NET assembly visible in MATLAB
+    ljasm = NET.addAssembly('LJUDDotNet');
     ljudObj = LabJack.LabJackUD.LJUD;
 
-    %Open the first found LabJack U3.
+%   Open the first found LabJack U3.
     [ljerror, ljhandle] = ljudObj.OpenLabJack(LabJack.LabJackUD.DEVICE.U3, LabJack.LabJackUD.CONNECTION.USB, '0', true, 0);
-    
     ljport=4;
-    %Start by using the pin_configuration_reset IOType so that all pin assignments are in the factory default condition.
+    
+%   Start by using the pin_configuration_reset IOType so that all pin assignments are in the factory default condition.
     ljudObj.ePut(ljhandle, LabJack.LabJackUD.IO.PIN_CONFIGURATION_RESET, 0, 0, 0);
+    if (state == 1)
             %SWITCH LEDs ON
             %Set digital output FIO4 to output-high.
             ljudObj.AddRequest(ljhandle, LabJack.LabJackUD.IO.PUT_DIGITAL_BIT, ljport, 1, 0, 0);
@@ -32,5 +34,4 @@ function [ dblValue ] = toggleLED(~, ~,  state)
     else
         display('LEDs OFF');
     end
-    %methods(ljudObj)
 end
