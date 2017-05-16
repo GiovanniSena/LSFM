@@ -116,20 +116,29 @@ function start_call( mainFig )
                 usePrevScan= getappdata(mainFig, 'usePreviousScan');
                 if (usePrevScan==0) % if this is the first scan
                     oldStack= tr_takeSlices(mainFig, stackName); %current stack is called "oldstack"
-                    [MIPmean, MIPstDev]=GUI_displayMIP(mainFig, oldStack); %show MIP
+                    %[MIPmean, MIPstDev]=GUI_displayMIP(mainFig,oldStack);%commented out by todd
+                    GUI_displayMIP(mainFig, oldStack); %removed the save parameters, or else, the function won't display
+                    
                 else  % if this is not the first scan
                     newStack= tr_takeSlices(mainFig, stackName); %current stack is called "newstack"
-                    [MIPmean, MIPstDev]=GUI_displayMIP(mainFig, newStack); %show MIP
+                    %[MIPmean, MIPstDev]=GUI_displayMIP(mainFig,newStack);%Commented out by todd
+              
+                
+                    GUI_displayMIP(mainFig, newStack);  %removed the save parameters, or else, the function won't display
+                    
+
                 end
                 acquiredTp= acquiredTp+1; %Increase counter for acquired time point
             else  % do the following if you are NOT in simulation mode
                 pause(120); % wait 2 minutes (laser on cuvette)
             end
             
-          
 
-          % PREVIEW OFF
-            GUI_previewToggle( mainFig, 0 );
+          % PREVIEW O
+           %GUI_previewToggle( mainFig, 0 );  %if we want to have the preview show the last MIP, we have to change this here
+                                              %and keep the preview on, but
+                                              %just showing the last MIP,
+                                              %not overwriting it.  -TF
           % LED ON
             GUI_LEDToggle(1);
           % SHUTTER CLOSED
