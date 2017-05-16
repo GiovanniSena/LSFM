@@ -1,3 +1,6 @@
+%% Use to test the LED clusters.
+% Set the state to 1 or 0 to switch the cluster on or off.
+
 [ ljudObj, ljhandle ] =LED_initialize();
 
 port= 4; % Two channesl to use: 4 and 5
