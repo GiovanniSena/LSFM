@@ -1,7 +1,8 @@
 function [myPump] = pump_initialize( sPort )
-%% PUMP_INITIALIZE Open serial connection with Arduino, returns serial object
-%   
-    %sPort= 'COM10';
+%%  PUMP_INITIALIZE Open serial connection with Arduino, returns serial object
+%   Attempts to establish a connection with the specified serial port and,
+%   is successful, returns the corresponding handle.
+
     myPump = serial(sPort,'BaudRate',9600, 'Terminator', 'LF');%/CR
 
     try
@@ -14,11 +15,5 @@ function [myPump] = pump_initialize( sPort )
     pause(3); %Needed after opening to ensure the communication is active.
     fprintf(myPump, '*idn?');
     readback= fscanf(myPump);
-%     if readback== 'PUMP and TEMPERATURE PROBE'
-%         myMsg= 'PUMP OPEN';
-%     else
-%         myMsg= 'Error opening pump communication: check COM settings';
-%     end
-%     disp(myMsg);
 end
 

@@ -1,6 +1,14 @@
 function pumpEdit_call_calibrated( source, data , pump)
-%% pumpEdit_call
-% Make sure that the value typed is correct for pump speed.
+%%  PUMPEDIT_CALL_CALIBRATED Sets the pump speed based on the GUI parameters.
+%   This function interpretes the data typed in the GUI and sets the pump
+%   speeds accordingly. All the sanity checks to ensure that correct values are
+%   sent to the pump should be performed here.
+%   This function also applies a calibration to the pump values, so that
+%   the user can type a flow (mL/min) rather than an arbitrary value.
+%   The calibration parameters used to linearize the flow with the pump
+%   speed are retrieved from the config file (pump.offset,
+%   pump.conversion). Check the LSFM manual for further details.
+
     minValue = 0.15;
     maxValue = 0.9;
     
@@ -8,7 +16,7 @@ function pumpEdit_call_calibrated( source, data , pump)
     if isnan(input)
         errorMsg = strcat('Pump speed must be a numeric value in range [', num2str(minValue), ' - ', num2str(maxValue), '] ml/min.');
         errordlg(errorMsg,'Invalid Input','modal');
-        set(source, 'String', ''); % Should read back current value, really
+        set(source, 'String', '');
         return
     else
         if (input > maxValue)
@@ -27,5 +35,4 @@ function pumpEdit_call_calibrated( source, data , pump)
         myPump = getappdata(gcf, 'myPump');
         pump_set( myPump, pump, pumpSpeed );
     end
-
 end

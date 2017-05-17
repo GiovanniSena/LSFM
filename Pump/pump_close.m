@@ -1,6 +1,7 @@
 function pump_close( myPump )
-%% PUMP_INITIALIZE Open serial connection with Arduino, returns serial object
-%   
+%%  PUMP_CLOSE Close serial connection with pump.
+%   Releases the serial port used to communicate with the Pump (Arduino).
+%   Delete all objects connected with the pump.
 
     try
         fclose(myPump);
@@ -9,7 +10,5 @@ function pump_close( myPump )
     catch
         disp('Error closing serial communication with PumpArduino.');
     end
-    %instrfind
-    %instrfindall
 end
 
