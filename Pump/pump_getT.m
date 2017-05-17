@@ -1,21 +1,16 @@
 function [ temp ] = pump_getT( myPump )
-%% PUMP_GETT
-%  Get temperature reading.
+%%  PUMP_GETT Query the Arduino hardware to retrieve temperature.
+%   Get temperature reading from the corresponding serial resource. This
+%   function is now deprecated since the temperature probes are no longer
+%   connected to the same Arduino controlling the pump.
 
     fprintf(myPump, 'temp');
-    %pause(1);
-    %nBytes = myPump.BytesAvailable;
-    %reply = fscanf(myPump, '%s', nBytes); %24 bytes per reading.
     reply = fscanf(myPump);
-    %disp(['getT ' reply]);
-    
     if (strfind(reply, 'Temperature (C)') == 1)
         [token, remain] = strtok(reply , ':'); % Remove text and leave just temperature in Celsius
-        %if(token== 'Temperature (C)')
         temp = str2num(remain(2:end));
     else
         temp= -300;
     end
-    %disp(num2str(temp));
 end
 

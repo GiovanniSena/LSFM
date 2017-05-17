@@ -1,8 +1,8 @@
 function pump_stop( myPump, pump )
-%% PUMP_STOP
+%% PUMP_STOP Stops the pump controlled by Arduino.
 %  Stop pump. If pump is 0 stop both.
+
     switch pump
-        
         case 0
             command = 'stop';
         case 1
@@ -11,7 +11,5 @@ function pump_stop( myPump, pump )
             command = 'stop2';
     end
         fprintf(myPump, command);
-    
-
 end
 

@@ -1,9 +1,11 @@
 function [reply] = pump_cmd( myPump, command )
-%% PUMP_INITIALIZE Open serial connection with Arduino, returns serial object
-%   
+%%  PUMP_CMD Parses the command sent to the Arduino Pump
+%   This template function can be used to parse the commands sent to the
+%   pump. In the current code it has been split into several dedicated
+%   functions.
+
     reply = '';
     fprintf(myPump, command);
-    %pause(0.5);
     switch command
         case 'start'
             
@@ -32,10 +34,5 @@ function [reply] = pump_cmd( myPump, command )
             %reply = fscanf(myPump, '%s', 10);
             reply = fscanf(myPump);
     end
-    
-        %disp(reply);
-    
-    %instrfind
-    %instrfindall
 end
 

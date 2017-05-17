@@ -1,12 +1,14 @@
 function pumpEdit_call( source, data , pump)
-%% pumpEdit_call
-% Make sure that the value typed is correct for pump speed.
+%%  PUMPEDIT_CALL Sets the pump speed based on the GUI parameters.
+%   This function interpretes the data typed in the GUI and sets the pump
+%   speeds accordingly. All the sanity checks to ensure that correct values are
+%   sent to the pump should be performed here.
     
     input = str2double(get(source,'string'));
     if isnan(input)
         errorMsg = strcat('Pump speed must be a numeric value in range [500 - 8000].');
         errordlg(errorMsg,'Invalid Input','modal');
-        set(source, 'String', ''); % Should read back current value, really
+        set(source, 'String', '');
         return
     else
         if (input > 8000)
@@ -21,5 +23,4 @@ function pumpEdit_call( source, data , pump)
         myPump = getappdata(gcf, 'myPump');
         pump_set( myPump, pump, input );
     end
-
 end
