@@ -24,7 +24,8 @@ function [ yFocus ] = tr_autofocus( afSpacing, motor, video_obj )
     sharpVal= sharpVal';
     for i= 1:samples    
      % MOVE TO POSITION
-        newPos= initPos + PosAF(i)*afSpacing;
+        %newPos= initPos + PosAF(i)*afSpacing;
+        newPos= initPos + PosAF(i)*afSpacing + i*0.00035;  %autofocus correction, TF May 2nd, 2017
         HW_moveAbsolute(motor, newPos);
         myMsg= ['AF: move relative= ' num2str(PosAF(i)) ' steps (step size= ' num2str(afSpacing) ')'];
         if (DEBUG) disp(myMsg); end %#ok<SEPEX>
