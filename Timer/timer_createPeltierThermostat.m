@@ -1,60 +1,63 @@
 function [ peltierThermostat ] = timer_createPeltierThermostat( varargin)
- %% TIMER_CREATETEMP Create timer object to measure temperature
- %  This object is in charge of updating the temperature DISPLAY in the main
- %  GUI. The period used to read the probe is fixed to 8 seconds.
-    
+%%  TIMER_CREATETEMP Create timer object to control Peltier based on temperature reading
+%   This timer is in charge of acting like a thermostat, monitoring the
+%   reading of one of the temperature sensors and activating the Peltier if
+%   the temperature falls below a user-defined threshold.
+%   A detaild explanation of the feedback function is given tin the LSFM
+%   user manual.
+
+%   Create timer
     peltierThermostat = timer;
     
-    % RETRIEVE THE FEEDBACK PARAMETERS FROM THE CONFIGURATION FILE
+%   Retrieve feedback parameters from configuration file
     configData= getappdata(varargin{1}, 'confPar');
     posWindow= str2num(configData.temperature.poswindow);
     negWindow= str2num(configData.temperature.negwindow);
     negExtreme= str2num(configData.temperature.negextreme);
     initialStep= str2num(configData.temperature.initialstep);
-    sensorID= str2num(configData.temperature.usesensor);
+    sensorID= str2num(configData.temperature.usesensor); % Define which temperature sensor to monitor
     feedbackPar= [posWindow, negWindow, negExtreme, initialStep, sensorID];
     
-    
-    % The sensors cannot update faster than once every 4 seconds. Let's keep
-    % it safe and use 6 seconds periods as a minimum.
-    
+%   Define periodic execution parameters    
     peltierThermostat.StartDelay = 0;
     peltierThermostat.Period = 30;
     peltierThermostat.ExecutionMode = 'fixedRate';
     
+%   Assign timer functions    
     peltierThermostat.TimerFcn = {@updatePeltierThermostat, varargin{1}, feedbackPar};
     peltierThermostat.StartFcn = @initPeltierThermostat;
     peltierThermostat.StopFcn = {@stopPeltierThermostat, varargin{1}};
     setappdata(varargin{1}, 'peltierThermostat', peltierThermostat);
-
 end
 
 function updatePeltierThermostat( obj, event, mainFig, feedbackPar)
-%function updateTemperature( obj, ~, tempTs, tempHaxes )
- %% UPDATEPELTIERTHERMOSTAT Check the cuvette temperature and start/stop the Peltier accordingly
- %  This function reads the temperature indicators and uses the value from
- %  the NTC to determine whether the Peltier needs to be switched on or
- %  off.
+%%  UPDATEPELTIERTHERMOSTAT Check the cuvette temperature and start/stop the Peltier accordingly
+%   This function reads the temperature indicators and uses the value from
+%   the temperature sensor to determine whether the Peltier needs to be switched on or
+%   off. Note that the function does not use the reading from the sensors,
+%   rather reads the current values of the temperature indicators, so we
+%   can perform smoothing on the data put in the display and base the
+%   thermostat on that data, rather than raw data from sensors.
     
-    
+%   Retrieve indicators handles
     TempIndIR= getappdata(mainFig, 'TempIndIR');
     TempIndNTC= getappdata(mainFig, 'TempIndNTC');
     targetTemp= getappdata(mainFig, 'targetTemp');
     myTemp= getappdata(mainFig, 'myTemp');
     
-  % READ TARGET TEMPERATURE
+%   Read target temperature
     targetTemp= str2double(get(targetTemp, 'String')); 
     
-  % READ IR_TEMP 
+%   Read IR sensor
     newTempIR=str2double(get(TempIndIR, 'String'));
        
-  % READ NTC_TEMP
+%   Read NTC sensor
     newTempNTC=str2double(get(TempIndNTC(1), 'String'));
     
-    % USE THE PELTIER AS A HEATER
-    posWindow= feedbackPar(1); % switch off if delta is above this
-    negWindow= feedbackPar(2); % switch on if delta is below this
-    negExtreme= feedbackPar(3); % worst case negative delta.
+%   Use Peltier as heater
+    posWindow= feedbackPar(1); % switch off if deltaT is above this
+    negWindow= feedbackPar(2); % switch on if deltaT is below this
+    negExtreme= feedbackPar(3); % worst case negative delta (full power).
     initialStep= feedbackPar(4); % initial step when the peltier is off
     sensorID= feedbackPar(5); % what sensor shall we use for the feedback?
     
@@ -75,37 +78,32 @@ function updatePeltierThermostat( obj, event, mainFig, feedbackPar)
             fprintf('Unknowne sensor selected. Using default NTC sensor 1.\n');
             newTemperature=str2double(get(TempIndNTC(1), 'String'));
     end
-    
-    deltaT= newTemperature - targetTemp; % difference between cuvette temperature and target temperature
+
+%   Calculate delta temperature (sensor - targetTemp)   
+    deltaT= newTemperature - targetTemp;
     fprintf('Target T= %2.1f, T(sensor)= %2.1f, DeltaT=%2.1f\n', targetTemp, newTemperature, deltaT);
     
+%   Action based on value of deltaT
     %fprintf('Feedback parameters. posWindow= %d, negWindow= %d, negExtreme= %d, initialStep= %d\n', posWindow, negWindow, negExtreme, initialStep);
     if deltaT >= posWindow
         GUI_peltierToggle(mainFig, 0, 0);
     end
-    
     if (deltaT < negWindow)
         peltPower= ((deltaT-negWindow)*(100-initialStep)/(negExtreme-negWindow))+ initialStep;
         peltPower= round(peltPower);
         GUI_peltierToggle(mainFig, 1, peltPower);
     end
-    
-        
 end
 
 function initPeltierThermostat(obj, ~)
- %% Initialize the temperature timer
- %  
-    
-    
+%%  INITPELTIERTHERMOSTAT Initialize the thermostat timer
+%   At least display a message on the command window
     disp('peltier Thermostat timer started');
-    %obj.UserData= [];
-    
 end
 
 function stopPeltierThermostat(obj, ~, mainFig)
- %% Executed when the temperature timer stops
+%%  STOPPELTIERTHERMOSTAT Executed when the temperature timer stops
+%   Display message
     fprintf('peltier Thermostat timer stopped\n');
- 
 end
 

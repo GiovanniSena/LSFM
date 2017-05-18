@@ -1,30 +1,28 @@
 function updateTime(~, ~,  startScanTime, indicatorHandle )
-%% TOTALTIME Summary of this function goes here
+%%  UPDATETIME Track time since last update of tracking data
 %  
+
     secondsInAMinute = 60;
     secondsInAnHour  = 60 * secondsInAMinute;
     secondsInADay    = 24 * secondsInAnHour;
     
     elapsedTime = toc(startScanTime);
- % extract days
+%   extract days
     days = floor(elapsedTime / secondsInADay);
- % extract hours
+%   extract hours
     hourSeconds = rem(elapsedTime , secondsInADay);
     hours = floor(hourSeconds / secondsInAnHour);
- % extract minutes
+%   extract minutes
     minuteSeconds = rem(hourSeconds , secondsInAnHour);
     minutes = floor(minuteSeconds / secondsInAMinute);
 
- % extract the remaining seconds
+%   extract the remaining seconds
     remainingSeconds = rem(minuteSeconds , secondsInAMinute);
     seconds = floor(remainingSeconds);
-
-    %isScan =  getappdata(gcf, 'isScanning');
     
     text = sprintf('%02d:%02d:%02d:%02d', days, hours, minutes, seconds);
     
     set(indicatorHandle, 'string', text);
-    
 end
 
 

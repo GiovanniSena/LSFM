@@ -1,12 +1,10 @@
-function updateTime( startScanTime, indicatorHandle )
-%% TOTALTIME Summary of this function goes here
+function totalTime( startScanTime, indicatorHandle )
+%%  TOTALTIME Tracks the total time elapsed
 %  
     isScan =  getappdata(gcf, 'isScanning');
     elapsedTime = toc(startScanTime);
     
     set(getappdata(gcf, 'totalTimeInd'), 'string', elapsedTime);
     i=0;
-    
-    %http://uk.mathworks.com/help/matlab/ref/timer-class.html
 end
 
