@@ -1,16 +1,16 @@
 function [ temp ] = tempHW_getT_NTC( myTemp, sensor )
- %% TEMPHW_GETT_NTC
- %  Read the NTC sensor connected to one of the Arduino ports inputs.
- %  myTemp is the serial socket.
- %  sensor is the port number (currently 0 to 2)
+%%  TEMPHW_GETT_NTC Query one of the temperature probes.
+%   Read the NTC sensor connected to one of the Arduino port inputs.
+%   myTemp is the serial socket.
+%   sensor is the port number (currently 0 to 2).
+%   A reading of -300 indicates an error in the communication (or the
+%   sudden failure of fundamental physics' laws).
     
+%   Query the temperature sensor
     send= ['tempNTC' num2str(sensor) '?'];
     fprintf(myTemp, send);
-    
-    %fprintf(myTemp, 'tempNTC0?');
-    
+%   Parse the reply from Arduino    
     reply = fscanf(myTemp);
-    
     expectedAns= ['TemperatureNTC' num2str(sensor) ' (C)'];
     if (strfind(reply, expectedAns) == 1)
         [token, remain] = strtok(reply , ':'); % Remove text and leave just temperature in Celsius
@@ -18,7 +18,5 @@ function [ temp ] = tempHW_getT_NTC( myTemp, sensor )
     else
         temp= -300;
     end
-    
-    %disp(num2str(temp));
 end
 

@@ -1,9 +1,13 @@
 function [myTemp] = tempHW_initialize( sPort )
-%% TEMPHW_INITIALIZE Open serial connection with Arduino, returns serial object
-%   
-    %sPort= 'COM10';
+%%  TEMPHW_INITIALIZE Open serial connection with Arduino, returns serial object
+%   Establish a serial connection with the temperature Arduino. The
+%   function returns the handle to the serial object created.
+%   "Port" is the COM port to which the Arduino is connected.
+    
+    %sPort= 'COM10'; %for debug purposes
+%   Initialize serial parameters
     myTemp = serial(sPort,'BaudRate',9600, 'Terminator', 'LF');%/CR
-
+%   Attempt to open the port
     try
         fopen(myTemp);
         disp('TEMP_HW OPEN');

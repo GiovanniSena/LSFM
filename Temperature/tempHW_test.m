@@ -1,7 +1,12 @@
 function  tempHW_test(  )
-%TEMPHW_TEST Summary of this function goes here
-%   Detailed explanation goes here
-%s = serial('COM10','BaudRate',9600, 'Terminator', 'LF/CR');
+%%  TEMPHW_TEST Test the Arduino temperature controller
+%   This is an utility function to verify the functionality of the
+%   hardware. It will establish a connection over serial port, read the
+%   value of the temperature probes, set the Peltier cell power to 99, then
+%   0. Finally, close the serial link.
+
+
+%   s = serial('COM10','BaudRate',9600, 'Terminator', 'LF/CR');
 
     fprintf('Running script, please wait.\n');
     myTemp= tempHW_initialize('COM13'); % CHANGE THIS PARAMETER ACCORDING TO WHERE THE USB CABLE IS CONNECTED
@@ -28,21 +33,6 @@ function  tempHW_test(  )
     myPower= tempHW_getPeltier(myTemp);
     fprintf('Power= %d\n', myPower);
     
-    %tempTs= timeseries('Temperature');
-    %tempTs.UserData= datetime('now');
-    
-    %for i=1:10
-%         c= now;
-%         tempIR= tempIR+1;
-%         tempTs.addsample('Time', c , 'Data', tempIR);
-%         plot(tempTs);
-%         pause(1);
-%         disp(tempIR);
-%     end
-%     plot(tempTs)
-    
     tempHW_close(myTemp);
-%instrfind
-%instrfindall
 end
 
