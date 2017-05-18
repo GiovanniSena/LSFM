@@ -1,8 +1,9 @@
 function tempHW_peltToggle( myTemp, status )
-%% TEMPHW_PELTTOGGLE
-%  Toggle the peltier cell On/Off.
+%%  TEMPHW_PELTTOGGLE Toggles the status of the Peltier cell.
+%   Use this function to switch the Peltier cell on or off depending on the
+%   value of "status".
+
     switch status
-        
         case 0
             disp('SET OFF');
             command = 'peltOFF';
