@@ -1,4 +1,4 @@
-function [myStack]= tr_takeSlices(mainFig, fileName )
+function [myStack]= tr_takeSlices_RSR(mainFig, fileName )
  %% TR_TAKESLICES Take N pictures, moving Sy after each snap, and save them to file
  %   
     

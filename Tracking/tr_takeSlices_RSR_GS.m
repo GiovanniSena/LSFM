@@ -1,4 +1,4 @@
-function [myStack]= tr_takeSlices(mainFig, fileName )
+function [myStack]= tr_takeSlices_RSR_GS(mainFig, fileName )
  %% TR_TAKESLICES Take N pictures, moving Sy after each snap, and save them to file
  %    % NB the stack will be 1040x1392xn matrix, with root horizontal and tip to the righ 
  

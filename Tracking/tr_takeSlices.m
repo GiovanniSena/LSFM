@@ -1,38 +1,39 @@
 function [myStack]= tr_takeSlices(mainFig, fileName )
- %% TR_TAKESLICES Take N pictures, moving Sy after each snap, and save them to file
- %    % NB the stack will be 1040x1392xn matrix, with root horizontal and tip to the righ 
+%%  TR_TAKESLICES Take N pictures, moving Sy after each snap, and save them to file
+%    
+%   NB the stack will be 1040x1392xn matrix, with root horizontal and tip to the righ 
  
- % v. 161027
-    
+%   v. 161027
     fprintf('EXECUTING SCAN\n');
-    
+
+%   Retrieve hardware handles
     confData= getappdata(mainFig, 'confPar');
     video_obj= getappdata(mainFig, 'vidobj'); 
     video_src= getappdata(mainFig, 'videosrc');
     DEBUG= confData.application.debug;
     AFInd = getappdata(mainFig, 'AFInd');
  
- % Retrieve area of objects (none hopefully) in background image)
+%   Retrieve area of objects in background image
     bgrarea= getappdata(mainFig, 'bgrarea');
     
- % READ N SLICES AND SPACING
-    nSlices= str2double(confData.user.nimages);
-    camerax= str2double(confData.camera.camerax); %1040px = our X dimension?
-    cameray= str2double(confData.camera.cameray); %1392px = our Z dimension?
-    ySpacing= str2double(confData.user.yspacing);
+%   Retrieve parameters, including N slices and step
+    nSlices= str2double(confData.user.nimages); % images in a stack
+    camerax= str2double(confData.camera.camerax); %1040px = our X dimension
+    cameray= str2double(confData.camera.cameray); %1392px = our Z dimension
+    ySpacing= str2double(confData.user.yspacing); %spacing between images of stack
     afinterval= str2double(confData.user.afinterval); % every 'afinterval' slices, the AF step is executed 
-    afspacing= str2double(confData.user.afspacing);
-    saveDir= confData.application.savedir;
-    avg_sample= str2double(confData.user.avg_sample);
-    safeDist= str2double(confData.motor.safedist_fy);
+    afspacing= str2double(confData.user.afspacing); % step for af spacing
+    saveDir= confData.application.savedir; %save folder
+    avg_sample= str2double(confData.user.avg_sample); % numbers of samples to use for averagins images
+    safeDist= str2double(confData.motor.safedist_fy); %safety parameter
     camadjustroot=str2num(confData.user.f_fystep); % retrieves necessary delta F as function of delta Y, calibrated with a H2B:YFP root
     camadjustbgrd=str2num(confData.user.f_fdeltay); % retrieves necessary delta F as function of delta Y, calibrated with fluorescent beads
     logDir= confData.application.logdir;
  
- % PREALLOCATE EMPTY STACK   
+%   Preallocate empty stack
     myStack= uint16(zeros(camerax, cameray, nSlices)); % camerax=#rows=1040; cameray=1392=#columns : it is ready to image a horizontal root (that is what the camera sees)
     
- % READ CURRENT COORDINATES (JUST Y and F)
+%   Read current coordinates (Sy and F)
     motorHandles = getappdata(mainFig, 'actxHnd');
     currentF= HW_getPos(motorHandles(5));
     currentY= HW_getPos(motorHandles(2));
@@ -41,14 +42,14 @@ function [myStack]= tr_takeSlices(mainFig, fileName )
         disp(myMsg);
     end
     
- % CHECK DISTANCE CUVETTE-OBJECTIVE
+%   Check distance cuvette-objective
     finalY= (nSlices-1)*ySpacing + currentY;
     if ((finalY + currentF) >= safeDist)
         myError = ['Current parameters will bring objective in collision with cuvette. Move stages or change settings (tab AUTO, CONFIG), then try again. Final delta= ' num2str(-finalF-currentY+safeDist, '%0.3f') '; Current delta= ' num2str(-currentF - currentY +safeDist, '%0.3f')];
         errordlg(myError);
     else
         
- % READ FILE NAME
+%   Read file name
         if isempty(fileName)
             myError= ('Please specify a file name');
             errordlg(myError);
@@ -59,8 +60,7 @@ function [myStack]= tr_takeSlices(mainFig, fileName )
                 myMsg= [fprintf('Stack will be saved in: \n') saveDir fileName];
                 disp(myMsg);
             end
-            
- % READ CURRENT COORDINATES, WRITE THEM TO FILE TOGETHER WITH STACK NAME
+    %   Read current coordinates, write them to file together with stack name
             motorLabArray = ['X', 'Y', 'Z', 'C', 'Focus', 'Shutter']; 
             logString = '';
             for i= 1:5
@@ -71,18 +71,18 @@ function [myStack]= tr_takeSlices(mainFig, fileName )
             initialPosY= HW_getPos(motorHandles(2));  %isn't it the same as CurrentY above?
             initialPosF= HW_getPos(motorHandles(5));   %isn't it the same as CurrentF above?
             
-            fileNameLog = [char(fileSplit(1)) '.txt']; %NAME OF THE LOG FILE
+            fileNameLog = [char(fileSplit(1)) '.txt']; % NAME OF THE LOG FILE
             logString = [fileName '; ' logString, 'YSpacing= ' num2str(ySpacing, '%01.4f') ' mm \n']; 
             if(DEBUG) disp(logString); end
             fid = fopen([logDir fileNameLog], 'a+');
             fprintf(fid, logString);
             fclose(fid);
             
- % LOOP AND TAKE SNAPSHOTS
-         for i=1:nSlices
+    %   Loop and take snapshots
+            for i=1:nSlices
                 fprintf('TAKING IMAGE %d OF %d\n', i, nSlices);
                 
-                % check if slice contains root or if empty
+            %   Check if slice contains root or if empty
                 myPicture =  camera_snapshot_avg(video_obj, avg_sample);
                 [ T, BW, BWf, ttl_area ]= bgrcheck(myPicture);
                 bwName=strrep(fileName, '.tif', '_bw.tif');
@@ -104,34 +104,28 @@ function [myStack]= tr_takeSlices(mainFig, fileName )
                                 set(AFInd, 'backgroundcolor', 'default');
                             end
                     end
-                    
                 else % if root is not in the field
                     if i>1  %skip first slice because didn't move cuvette, yet
                     HW_moveRelative(motorHandles(5), camadjustbgrd*ySpacing); % move F using calibration in liquid 
                     end
                 end
                 
-                
-                % take snapshot
+            %   Take snapshot and append it to the stack image
                 myPicture =  camera_snapshot_avg(video_obj, avg_sample);
                 myStack(:,:,i)= myPicture;
                 TIFF_write(myPicture, [saveDir fileName]);
                 pause(video_src.Exposure); %wait until exposure is completed
                
-                % move to next slice
+            %   Move to next slice
                 HW_moveRelative(motorHandles(2), ySpacing);       
-         end
+            end
             
-        % RETURN TO Sy AND F TO INITIAL POSITION
+        %   Return Sy and F to initial positions
             HW_moveAbsolute(motorHandles(2), initialPosY);
             HW_moveAbsolute(motorHandles(5), initialPosF);
         
         end %refers to if line50
-       
     end %refers to if line 44
-    
-
- 
     fprintf('SCAN FINISHED\n');
 end
 
