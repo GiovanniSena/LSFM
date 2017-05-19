@@ -517,7 +517,7 @@ function mainFig = mainGUI(fileName)
             TAB2_GUI(tab_2);
 
 %%   TAB 3 "WEBCAM" controls
-            TAB3_GUI(tab_3);
+            %TAB3_GUI(tab_3);   %Disabled as per GS request 19/05/2017
             
 %%   TAB 4 "PLOTS"
             TAB4_GUI(tab_4);
