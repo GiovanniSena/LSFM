@@ -1,9 +1,13 @@
 function [ output_args ] = plotRootMovement( myFolder )
- %% PLOTROOTMOVEMENT Summary of this function goes here
- %   Detailed explanation goes here
- 
+%%  PLOTROOTMOVEMENT Use the log files to plot root movement
+%   This function uses the log files in a folder to display the root
+%   movement.
+
+%   Choose whether to perform Maximum Intensity Projection (if set to 1 the
+%   code is much slower)
     doMIP= 0;
 
+%   Specify files location
     myFolder= 'S:\LiSM data\161124\originals\';
     fileList= listFilesInFolder(myFolder);
     
@@ -79,7 +83,6 @@ function [ output_args ] = plotRootMovement( myFolder )
     hold(cumulAxis, 'on');
     plot(cumulAxis, timeVector,  cumulZ);
     legend(cumulAxis, 'PosX', 'PosY', 'PosZ');
-    
     
     %saveTightFigure(hFig, [resultsFolder 'output.pdf']);
     hold(dtAxis, 'off');
